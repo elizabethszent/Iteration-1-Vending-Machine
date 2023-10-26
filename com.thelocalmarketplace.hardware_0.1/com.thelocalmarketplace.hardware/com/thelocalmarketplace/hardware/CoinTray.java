@@ -15,7 +15,6 @@ import ca.ucalgary.seng300.simulation.NullPointerSimulationException;
 import ca.ucalgary.seng300.simulation.SimulationException;
 import powerutility.PowerGrid;
 
-
 /**
  * Simulates the tray where dispensed coins go for the user to collect them. It
  * is a passive device requiring no power, being gravity-fed.
