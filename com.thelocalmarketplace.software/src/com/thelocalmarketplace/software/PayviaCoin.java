@@ -10,9 +10,10 @@ public class PayviaCoin {
 	private BigDecimal amount_inserted = BigDecimal.ZERO; //
 	private BigDecimal amount_owed; 
 	private CoinTray dispenced;
+	
 	//inalize value of amount_owed and CoinTray
 	public PayviaCoin(BigDecimal total, CoinTray tray ) {
-		amount_owed= total;
+		amount_owed = total;
 		dispenced = tray;
 	}
 	
