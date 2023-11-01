@@ -20,10 +20,15 @@ public class PayviaCoinTest {
 	    public void AddCoins() {
 	    	Coin.DEFAULT_CURRENCY = Currency.getInstance(Locale.CANADA); 
 	    	PayviaCoin paymentHandeler = new PayviaCoin(BigDecimal.ZERO, null);
-	    
+	    	PayviaCoin payment = new PayviaCoin(BigDecimal.valueOf(3), null);
+	    	
 	    	Coin tray = new Coin(BigDecimal.ONE);
 
 	        assertEquals(paymentHandeler.MakePayment(tray),false);
+	        assertEquals(payment.MakePayment(tray),true);
+	        assertEquals(payment.MakePayment(tray),true);
+	        assertEquals(payment.MakePayment(tray),false);
+	        assertEquals(payment.MakePayment(tray),false);
 	    }
 	
 
