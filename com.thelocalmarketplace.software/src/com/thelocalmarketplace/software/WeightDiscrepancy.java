@@ -1,22 +1,29 @@
 //Elizabeth Szentmiklossy UCID: 30165216
 //Justine Mangaliman UCID: 30164741
 package com.thelocalmarketplace.software;
-import java.math.BigDecimal;
-
 import com.jjjwelectronics.IDevice;
 import com.jjjwelectronics.IDeviceListener;
 import com.jjjwelectronics.Mass;
+import com.jjjwelectronics.OverloadedDevice;
 import com.jjjwelectronics.scale.AbstractElectronicScale;
 import com.jjjwelectronics.scale.ElectronicScaleListener;
 import com.jjjwelectronics.scale.IElectronicScale;
+import powerutility.NoPowerException;
 
 public class WeightDiscrepancy implements ElectronicScaleListener{
-	BigDecimal expectedWeight;
-	BigDecimal actualWeight;
+	Mass expectedWeight;
+	Mass actualWeight;
 	
-	public WeightDiscrepancy(BigDecimal eWeight,BigDecimal aWeight, AbstractElectronicScale listner ){
+	public WeightDiscrepancy(Mass eWeight, AbstractElectronicScale listner ){
 		expectedWeight = eWeight;
-		actualWeight =	aWeight;
+		try {
+			actualWeight = listner.getCurrentMassOnTheScale();
+		} catch (NoPowerException e) {
+			actualWeight = Mass.ZERO;
+		}
+		catch (OverloadedDevice e) {
+			actualWeight = Mass.ZERO;	
+		}
 		listner.register(this);
 		
 		
@@ -31,7 +38,9 @@ public class WeightDiscrepancy implements ElectronicScaleListener{
 	
 	@Override
 	public void theMassOnTheScaleHasChanged(IElectronicScale scale, Mass mass) {
+		actualWeight = mass;
 		// TODO Auto-generated method stub
+		
 		
 	}
 	@Override
