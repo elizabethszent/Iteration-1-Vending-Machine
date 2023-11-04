@@ -6,5 +6,28 @@
 package com.thelocalmarketplace.software;
 
 public class StartSession {
-  
+	private boolean sessionStarted = false;
+	
+	public boolean checkSessionStarted() {
+		if (sessionStarted == false) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	// method to start session
+	public void startSession() {
+		boolean status = checkSessionStarted();
+		
+		if (status == false) {
+			System.out.println("Touch Anywhere to Start");
+		} else {
+			System.out.println("System already started!");
+		}
+	}
+	
+	public void addItem() {
+		
+	}
 }
