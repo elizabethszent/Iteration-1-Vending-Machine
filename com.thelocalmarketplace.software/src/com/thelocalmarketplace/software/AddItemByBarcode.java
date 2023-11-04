@@ -9,6 +9,7 @@ package com.thelocalmarketplace.software;
 import com.jjjwelectronics.IDevice;
 import com.jjjwelectronics.IDeviceListener;
 import com.jjjwelectronics.scanner.Barcode;
+import com.jjjwelectronics.Mass;
 import com.jjjwelectronics.scanner.BarcodeScannerListener;
 import com.jjjwelectronics.scanner.IBarcodeScanner;
 import com.thelocalmarketplace.hardware.BarcodedProduct;
@@ -19,10 +20,12 @@ import java.util.ArrayList;
 
 public final class AddItemByBarcode implements BarcodeScannerListener {
 
-    private double expectedWeight;
+
+
+    private Mass expectedWeight;
     private final ArrayList<Product> order;
 
-    public AddItemByBarcode(double expectedWeight, ArrayList<Product> order) {
+    public AddItemByBarcode(Mass expectedWeight, ArrayList<Product> order) {
         this.expectedWeight = expectedWeight;
         this.order = order;
     }
@@ -34,15 +37,19 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
 
         try {
             // Add gui to stop customer interaction
+            blockFurtherCustomerInteraction();
             System.out.println("Checking barcode...");
 
             Product product = getProductByBarcode(barcode);
+
+            // update expected weight and add product to order
             addBarcodedProductToOrder(product, order);
 
             // implement GUI saying to add to bagging area
             System.out.println("Item added.\nPlease add item to bagging area.\nWaiting...");
             // session simulation must implement logic to wait for item to be added to bagging area
-            // then call getExpectedWeight from this and compare the actual vs expected weight
+
+            // then call getExpectedWeight from this and compare the actual vs expected weight and check for discrepency
 
         } catch (ProductNotFoundException e) { // need to implement exceptions in session simulation I think?
             // GUI message would go here
@@ -60,10 +67,16 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
     }
 
     // so that simulation session can get the expected weight when comparing with scale
-    public double getExpectedWeight( ) {
+    public Mass getExpectedWeight( ) {
         return expectedWeight;
     }
-
+    public boolean validBaggingArea( ) {
+        //todo
+        return true;
+    }
+    public void blockFurtherCustomerInteraction(){
+        //todo
+    }
     private void addBarcodedProductToOrder(Product product, ArrayList<Product> order) {
         order.add(product);
         expectedWeight += ((BarcodedProduct) product).getExpectedWeight();
