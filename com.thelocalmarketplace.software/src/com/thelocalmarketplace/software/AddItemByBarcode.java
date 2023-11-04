@@ -61,7 +61,6 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
 
         try {
             // Add gui to stop customer interaction
-            blockFurtherCustomerInteraction();
             System.out.println("Checking barcode...");
 
             Product product = getProductByBarcode(barcode);
@@ -100,7 +99,7 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
      *
      * @return The expected weight.
      */
-    public double getExpectedWeight( ) {
+    public Mass getExpectedWeight( ) {
         return expectedWeight;
     }
 
@@ -113,7 +112,9 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
      */
     private void addBarcodedProductToOrder(Product product, ArrayList<Product> order, IBarcodeScanner barcodeScanner) {
         order.add(product);
-        expectedWeight += ((BarcodedProduct) product).getExpectedWeight();
+
+        Mass weightOfProduct = new Mass(((BarcodedProduct) product).getExpectedWeight());
+        expectedWeight = expectedWeight.sum(weightOfProduct);
         
         if(discrepancy.CompareWeight()) {
         	barcodeScanner.enable();
