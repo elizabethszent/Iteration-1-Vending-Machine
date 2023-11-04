@@ -2,23 +2,26 @@
 //Justine Mangaliman UCID: 30164741
 
 package com.thelocalmarketplace.software;
-import com.thelocalmarketplace.hardware.CoinTray;
 
 public class main {
 
-
-    // idea to implement checking bagging area:
-    while (!validBaggingArea()):
-            Thread.sleep(1000)
-            System.out.println("Please add item to bagging area.\nWaiting...");
-
-    public void (validBaggingArea()){
-        if (1==1 //implement check logic) {
-            return true
-        }
-        else {
-            return false
-        }
+    // block user interactions
+    public void blockUserInteractions(){
+        //logic to blockUserInteractions
     }
+    // CheckBaggingArea
+    public void checkBaggingArea(){
+        //Logic to checkBaggingArea 
 
+    }
+        public int validBaggingArea() {
+            // Implement your check logic here.
+            if (1 == 1 /* implement check logic */) {
+                return 1;
+            } else {
+                return 0;
+            }
+    }
 }
+
+

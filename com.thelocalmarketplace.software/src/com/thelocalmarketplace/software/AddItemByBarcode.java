@@ -60,7 +60,7 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
     	// Check if state is satisfying the precondition: The system is ready to accept customer input.
 
         try {
-            // Add gui to stop customer interaction
+            // Add gui to block customer interaction
             System.out.println("Checking barcode...");
 
             Product product = getProductByBarcode(barcode);
