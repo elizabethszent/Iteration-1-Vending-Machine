@@ -17,11 +17,28 @@ import com.thelocalmarketplace.hardware.external.ProductDatabases;
 
 import java.util.ArrayList;
 
+
+/**
+ * AddItemByBarcode class handles the addition of products to an order by scanning barcodes
+ * and ensures that the expected weight matches the actual weight using a WeightDiscrepancy object.
+ * 
+ * @author Enzo Mutiso UCID: 30182555
+ * @author Abdelrahman Mohamed UCID: 30162037
+ * @author Elizabeth Szentmiklossy UCID: 30165216
+ */
 public final class AddItemByBarcode implements BarcodeScannerListener {
 
     private double expectedWeight;
     private final ArrayList<Product> order;
     private WeightDiscrepancy discrepancy;
+    
+    /**
+     * Constructs an AddItemByBarcode object with the expected weight, order, and WeightDiscrepancy instance.
+     *
+     * @param expectedWeight The expected weight to match with the actual weight.
+     * @param order          The order where products will be added.
+     * @param discrepancy    The WeightDiscrepancy object for weight comparison.
+     */
 
     public AddItemByBarcode(double expectedWeight, ArrayList<Product> order, WeightDiscrepancy discrepancy) {
         this.expectedWeight = expectedWeight;
@@ -30,9 +47,14 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
     }
 
 
-    // Method to add item by barcode scan
+    /**
+     * Adds a product to the order by scanning its barcode and verifies the weight matches the expected weight.
+     *
+     * @param barcodeScanner The barcode scanner.
+     * @param barcode        The scanned barcode.
+     */
     public void aBarcodeHasBeenScanned(IBarcodeScanner barcodeScanner, Barcode barcode) {
-        // Check if state is satisfying the precondition: The system is ready to accept customer input.
+    	// Check if state is satisfying the precondition: The system is ready to accept customer input.
 
         try {
             // Add gui to stop customer interaction
@@ -52,7 +74,13 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
         }
     }
 
-    // Method to get product information by barcode
+    /**
+     * Retrieves product information by its barcode.
+     *
+     * @param scannedBarcode The scanned barcode.
+     * @return The BarcodedProduct associated with the barcode.
+     * @throws ProductNotFoundException If the product is not found with the specified barcode.
+     */
     private BarcodedProduct getProductByBarcode(Barcode scannedBarcode) throws ProductNotFoundException {
         if (ProductDatabases.BARCODED_PRODUCT_DATABASE.containsKey(scannedBarcode)) {
             return ProductDatabases.BARCODED_PRODUCT_DATABASE.get(scannedBarcode);
@@ -61,11 +89,22 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
         }
     }
 
-    // so that simulation session can get the expected weight when comparing with scale
+    /**
+     * Gets the expected weight.
+     *
+     * @return The expected weight.
+     */
     public double getExpectedWeight( ) {
         return expectedWeight;
     }
 
+    /**
+     * Adds a barcoded product to the order and updates the expected weight.
+     *
+     * @param product       The barcoded product to add to the order.
+     * @param order         The order where products will be added.
+     * @param barcodeScanner The barcode scanner.
+     */
     private void addBarcodedProductToOrder(Product product, ArrayList<Product> order, IBarcodeScanner barcodeScanner) {
         order.add(product);
         expectedWeight += ((BarcodedProduct) product).getExpectedWeight();
@@ -80,26 +119,18 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
 
     @Override
     public void aDeviceHasBeenEnabled(IDevice<? extends IDeviceListener> device) {
-        // todo
-        // Auto generated method stub
     }
 
     @Override
     public void aDeviceHasBeenDisabled(IDevice<? extends IDeviceListener> device) {
-        // todo
-        // Auto generated method stub
     }
 
     @Override
     public void aDeviceHasBeenTurnedOn(IDevice<? extends IDeviceListener> device) {
-        // todo
-        // Auto generated method stub
     }
 
     @Override
     public void aDeviceHasBeenTurnedOff(IDevice<? extends IDeviceListener> device) {
-        // todo
-        // Auto generated method stub
     }
 
 
