@@ -21,10 +21,12 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
 
     private double expectedWeight;
     private final ArrayList<Product> order;
+    private WeightDiscrepancy discrepancy;
 
-    public AddItemByBarcode(double expectedWeight, ArrayList<Product> order) {
+    public AddItemByBarcode(double expectedWeight, ArrayList<Product> order, WeightDiscrepancy discrepancy) {
         this.expectedWeight = expectedWeight;
         this.order = order;
+        this.discrepancy = discrepancy;
     }
 
 
@@ -37,7 +39,7 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
             System.out.println("Checking barcode...");
 
             Product product = getProductByBarcode(barcode);
-            addBarcodedProductToOrder(product, order);
+            addBarcodedProductToOrder(product, order, barcodeScanner);
 
             // implement GUI saying to add to bagging area
             System.out.println("Item added.\nPlease add item to bagging area.\nWaiting...");
@@ -64,9 +66,16 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
         return expectedWeight;
     }
 
-    private void addBarcodedProductToOrder(Product product, ArrayList<Product> order) {
+    private void addBarcodedProductToOrder(Product product, ArrayList<Product> order, IBarcodeScanner barcodeScanner) {
         order.add(product);
         expectedWeight += ((BarcodedProduct) product).getExpectedWeight();
+        
+        if(discrepancy.CompareWeight()) {
+        	barcodeScanner.enable();
+        } else {
+        	barcodeScanner.disable();
+        }
+        	
     }
 
     @Override
