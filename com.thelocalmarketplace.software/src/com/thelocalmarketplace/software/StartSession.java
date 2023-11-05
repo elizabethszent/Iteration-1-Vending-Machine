@@ -8,6 +8,7 @@ package com.thelocalmarketplace.software;
 public class StartSession {
 	private boolean sessionStarted = false;
 	
+	// to check if the session is already started
 	public boolean checkSessionStarted() {
 		if (sessionStarted == false) {
 			return false;
@@ -21,13 +22,10 @@ public class StartSession {
 		boolean status = checkSessionStarted();
 		
 		if (status == false) {
+			status = true;
 			System.out.println("Touch Anywhere to Start");
 		} else {
 			System.out.println("System already started!");
 		}
-	}
-	
-	public void addItem() {
-		
 	}
 }
