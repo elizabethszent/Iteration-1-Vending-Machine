@@ -8,8 +8,8 @@ package com.thelocalmarketplace.software;
 
 import com.jjjwelectronics.IDevice;
 import com.jjjwelectronics.IDeviceListener;
-import com.jjjwelectronics.scanner.Barcode;
 import com.jjjwelectronics.Mass;
+import com.jjjwelectronics.scanner.Barcode;
 import com.jjjwelectronics.scanner.BarcodeScannerListener;
 import com.jjjwelectronics.scanner.IBarcodeScanner;
 import com.thelocalmarketplace.hardware.BarcodedProduct;
@@ -34,6 +34,7 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
     private Mass expectedWeight;
     private final ArrayList<Product> order;
     private WeightDiscrepancy discrepancy;
+    private ActionBlocker actionBlocker;
     
     /**
      * Constructs an AddItemByBarcode object with the expected weight, order, and WeightDiscrepancy instance.
@@ -43,10 +44,11 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
      * @param discrepancy    The WeightDiscrepancy object for weight comparison.
      */
 
-    public AddItemByBarcode(Mass expectedWeight, ArrayList<Product> order, WeightDiscrepancy discrepancy) {
+    public AddItemByBarcode(Mass expectedWeight, ArrayList<Product> order, WeightDiscrepancy discrepancy, ActionBlocker blocker) {
         this.expectedWeight = expectedWeight;
         this.order = order;
         this.discrepancy = discrepancy;
+        this.actionBlocker = blocker;
     }
 
 
@@ -61,6 +63,7 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
 
         try {
             // Add gui to block customer interaction
+            actionBlocker.blockInteraction();
             System.out.println("Checking barcode...");
 
             Product product = getProductByBarcode(barcode);
@@ -71,7 +74,7 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
             // session simulation must implement logic to wait for item to be added to bagging area
 
             // then call getExpectedWeight from this and compare the actual vs expected weight and check for discrepency
-
+            actionBlocker.unblockInteraction();
         } catch (ProductNotFoundException e) { // need to implement exceptions in session simulation I think?
             // GUI message would go here
             e.printStackTrace();
