@@ -16,81 +16,105 @@ import com.jjjwelectronics.scanner.BarcodeScannerListener;
 import com.jjjwelectronics.scanner.IBarcodeScanner;
 import com.thelocalmarketplace.hardware.BarcodedProduct;
 import com.thelocalmarketplace.hardware.Product;
-import com.thelocalmarketplace.hardware.external.ProductDatabases;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 
 /**
  * AddItemByBarcode class handles the addition of products to an order by scanning barcodes
  * and ensures that the expected weight matches the actual weight using a WeightDiscrepancy object.
- * 
+ *
  * @author Enzo Mutiso UCID: 30182555
  * @author Abdelrahman Mohamed UCID: 30162037
  * @author Elizabeth Szentmiklossy UCID: 30165216
  */
 public final class AddItemByBarcode implements BarcodeScannerListener {
 
-
-
-    private Mass expectedWeight;
-    private final ArrayList<Product> order;
+    /**
+     * The order where products will be added.
+     */
+    private ArrayList<Product> order;
+    /**
+     * The WeightDiscrepancy object for weight comparison.
+     */
     private WeightDiscrepancy discrepancy;
+    /**
+     * The ActionBlocker object to block customer interaction.
+     */
     private ActionBlocker actionBlocker;
+    /**
+     * The ElectronicScale object to get the actual weight.
+     */
     private ElectronicScale scale;
     /**
-     * Constructs an AddItemByBarcode object with the expected weight, order, and WeightDiscrepancy instance.
+     * The database of products.
+     */
+    private Map<Barcode, BarcodedProduct> database;
+    /**
+     * Constructs an AddItemByBarcode object with the expected weight, order, WeightDiscrepancy object, ActionBlocker object, ElectronicScale object, and database.
      *
      * @param expectedWeight The expected weight to match with the actual weight.
      * @param order          The order where products will be added.
      * @param discrepancy    The WeightDiscrepancy object for weight comparison.
+     * @param blocker        The ActionBlocker object to block customer interaction.
+     * @param scale          The ElectronicScale object to get the actual weight.
+     * @param database       The database of products.
      */
 
-    public AddItemByBarcode(Mass expectedWeight, ArrayList<Product> order, WeightDiscrepancy discrepancy, ActionBlocker blocker, ElectronicScale scale) {
-        this.expectedWeight = expectedWeight;
-        this.order = order;
+    public AddItemByBarcode(Mass expectedWeight, ArrayList<Product> order, WeightDiscrepancy discrepancy, ActionBlocker blocker, ElectronicScale scale, Map<Barcode, BarcodedProduct> database) {
         this.discrepancy = discrepancy;
+        this.discrepancy.expectedWeight  = expectedWeight;
+        this.order = order;
         this.actionBlocker = blocker;
         this.scale = scale;
+        this.database = database;
     }
 
 
     /**
-     * Adds a product to the order by scanning its barcode and verifies the weight matches the expected weight.
+     * Adds a product to the order by scanning its barcode.
      *
      * @param barcodeScanner The barcode scanner.
      * @param barcode        The scanned barcode.
      */
     public void aBarcodeHasBeenScanned(IBarcodeScanner barcodeScanner, Barcode barcode) {
-    	// Check if state is satisfying the precondition: The system is ready to accept customer input.
+        // Check if state is satisfying the precondition: The system is ready to accept customer input.
 
         try {
             // Add gui to block customer interaction
             actionBlocker.blockInteraction();
             System.out.println("Checking barcode...");
 
-            Product product = getProductByBarcode(barcode);
+            Product product = getProductByBarcode(barcode, database);
 
             addBarcodedProductToOrder(product, order, barcodeScanner);
             // implement GUI saying to add to bagging area
             System.out.println("Item added.\nPlease add item to bagging area.\nWaiting...");
             //  Compare actual vs expected weights to check for any discrepancies (also checks if item is in bagging area)
-            Mass actualWeight = scale.getCurrentMassOnTheScale();
-            if (!compare(this.getExpectedWeight(), actualWeight)) {
+            discrepancy.actualWeight = scale.getCurrentMassOnTheScale();
+            if (!discrepancy.CompareWeight()) {
                 throw new WeightDiscrepancyException("Weight does not match the expected weight.");
             }
 
 
             actionBlocker.unblockInteraction();
-        } catch (ProductNotFoundException e) { // need to implement exceptions in session simulation I think?
+        } catch (ProductNotFoundException e) {
             // GUI message would go here
             e.printStackTrace();
+            System.out.println("Product not found.");
         } catch (OverloadedDevice e) {
             throw new RuntimeException(e);
         }
     }
-    // exception used earlier
-    public class WeightDiscrepancyException extends RuntimeException {
+
+    /**
+     * Exception class for handling weight discrepancy errors during barcode scanning.
+     */
+    public static class WeightDiscrepancyException extends RuntimeException {
+        /**
+         * @param message The message to be displayed when the exception is thrown.
+         */
         public WeightDiscrepancyException(String message) {
             super(message);
         }
@@ -100,34 +124,37 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
      * Retrieves product information by its barcode.
      *
      * @param scannedBarcode The scanned barcode.
+     * @param database       The database of products.
      * @return The BarcodedProduct associated with the barcode.
      * @throws ProductNotFoundException If the product is not found with the specified barcode.
      */
-    private BarcodedProduct getProductByBarcode(Barcode scannedBarcode) throws ProductNotFoundException {
-        if (ProductDatabases.BARCODED_PRODUCT_DATABASE.containsKey(scannedBarcode)) {
-            return ProductDatabases.BARCODED_PRODUCT_DATABASE.get(scannedBarcode);
+    private BarcodedProduct getProductByBarcode(Barcode scannedBarcode, Map<Barcode, BarcodedProduct> database) throws ProductNotFoundException {
+        if (database.containsKey(scannedBarcode)) {
+            return database.get(scannedBarcode);
         } else {
             throw new ProductNotFoundException("Product not found with specified barcode.");
         }
     }
 
+    /**
+     * Retrieves the current order.
+     *
+     * @return The list of products in the current order.
+     */
+    public ArrayList<Product> getOrder( ) {
+        return order;
+    }
 
     /**
-     * Gets the expected weight.
+     * Retrieves the expected weight of the products in the order.
      *
-     * @return The expected weight.
+     * @return The expected weight of the products in the order.
      */
     public Mass getExpectedWeight( ) {
-        return expectedWeight;
+        return discrepancy.expectedWeight;
     }
 
-    public boolean compare(Mass weight1, Mass weight2){
-        if(weight1 == weight2){
-            return true;
-        } else {
-            return false;
-        }
-    }
+
     /**
      * Adds a barcoded product to the order and updates the expected weight.
      *
@@ -139,14 +166,14 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
         order.add(product);
 
         Mass weightOfProduct = new Mass(((BarcodedProduct) product).getExpectedWeight());
-        expectedWeight = expectedWeight.sum(weightOfProduct);
-        
+        discrepancy.expectedWeight = discrepancy.expectedWeight.sum(weightOfProduct);
+
         if(discrepancy.CompareWeight()) {
-        	barcodeScanner.enable();
+            barcodeScanner.enable();
         } else {
-        	barcodeScanner.disable();
+            barcodeScanner.disable();
         }
-        	
+
     }
 
     @Override
