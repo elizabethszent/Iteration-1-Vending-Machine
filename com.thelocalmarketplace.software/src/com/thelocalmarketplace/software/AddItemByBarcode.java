@@ -9,6 +9,8 @@ package com.thelocalmarketplace.software;
 import com.jjjwelectronics.IDevice;
 import com.jjjwelectronics.IDeviceListener;
 import com.jjjwelectronics.Mass;
+import com.jjjwelectronics.OverloadedDevice;
+import com.jjjwelectronics.scale.ElectronicScale;
 import com.jjjwelectronics.scanner.Barcode;
 import com.jjjwelectronics.scanner.BarcodeScannerListener;
 import com.jjjwelectronics.scanner.IBarcodeScanner;
@@ -35,7 +37,7 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
     private final ArrayList<Product> order;
     private WeightDiscrepancy discrepancy;
     private ActionBlocker actionBlocker;
-    
+    private ElectronicScale scale;
     /**
      * Constructs an AddItemByBarcode object with the expected weight, order, and WeightDiscrepancy instance.
      *
@@ -44,11 +46,12 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
      * @param discrepancy    The WeightDiscrepancy object for weight comparison.
      */
 
-    public AddItemByBarcode(Mass expectedWeight, ArrayList<Product> order, WeightDiscrepancy discrepancy, ActionBlocker blocker) {
+    public AddItemByBarcode(Mass expectedWeight, ArrayList<Product> order, WeightDiscrepancy discrepancy, ActionBlocker blocker, ElectronicScale scale) {
         this.expectedWeight = expectedWeight;
         this.order = order;
         this.discrepancy = discrepancy;
         this.actionBlocker = blocker;
+        this.scale = scale;
     }
 
 
@@ -71,13 +74,25 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
             addBarcodedProductToOrder(product, order, barcodeScanner);
             // implement GUI saying to add to bagging area
             System.out.println("Item added.\nPlease add item to bagging area.\nWaiting...");
-            // session simulation must implement logic to wait for item to be added to bagging area
+            //  Compare actual vs expected weights to check for any discrepancies (also checks if item is in bagging area)
+            Mass actualWeight = scale.getCurrentMassOnTheScale();
+            if (!compare(this.getExpectedWeight(), actualWeight)) {
+                throw new WeightDiscrepancyException("Weight does not match the expected weight.");
+            }
 
-            // then call getExpectedWeight from this and compare the actual vs expected weight and check for discrepency
+
             actionBlocker.unblockInteraction();
         } catch (ProductNotFoundException e) { // need to implement exceptions in session simulation I think?
             // GUI message would go here
             e.printStackTrace();
+        } catch (OverloadedDevice e) {
+            throw new RuntimeException(e);
+        }
+    }
+    // exception used earlier
+    public class WeightDiscrepancyException extends RuntimeException {
+        public WeightDiscrepancyException(String message) {
+            super(message);
         }
     }
 
@@ -106,6 +121,13 @@ public final class AddItemByBarcode implements BarcodeScannerListener {
         return expectedWeight;
     }
 
+    public boolean compare(Mass weight1, Mass weight2){
+        if(weight1 == weight2){
+            return true;
+        } else {
+            return false;
+        }
+    }
     /**
      * Adds a barcoded product to the order and updates the expected weight.
      *
